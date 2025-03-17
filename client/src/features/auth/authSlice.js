@@ -1,0 +1,28 @@
+import { createSlice } from '@reduxjs/toolkit';
+
+const initialState = {
+    isLoggedIn: false,
+}
+
+export const authSlice = createSlice({
+    name: 'login',
+    initialState, // 초기값
+    reducers: {
+        //로그인 처리에 필요한 함수
+        setIsLoggedIn(state, action){ // action : 외부에서 넘어오는 파라미터를 받을 때
+            console.log('action',action.payload.result_rows);
+            if(action.payload.result_rows){
+                state.isLoggedIn = true;
+            }
+           
+        },
+        setIsLogout(state){
+            state.isLoggedIn = false;
+        }
+    },
+})
+
+// Action creators are generated for each case reducer function
+export const { setIsLoggedIn, setIsLogout } = authSlice.actions
+
+export default authSlice.reducer

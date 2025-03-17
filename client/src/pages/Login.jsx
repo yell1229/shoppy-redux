@@ -1,4 +1,4 @@
-import React, { useState, useRef, useContext } from 'react';
+import React, { useState, useRef, useContext, useEffect } from 'react';
 import '../styles/login.css';
 import { FaUser } from "react-icons/fa";
 import { FaLock } from "react-icons/fa";
@@ -6,9 +6,13 @@ import { validateLogin } from '../utils/funcValidate.js';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../auth/AuthContext.js';
+import {getLogin} from '../services/authApi.js';
+import { useSelector, useDispatch } from 'react-redux';
 
 export default function Login() {
-    const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
+    const dispatch = useDispatch();
+    const isLoggedIn = useSelector(state => state.login.isLoggedIn);
+    // const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
     const navigate = useNavigate();
     const refs = {
         "idRef" : useRef(null),
@@ -19,6 +23,17 @@ export default function Login() {
     }
 
     const [formData, setFormData] = useState({'id':'', 'pwd':''});
+
+    useEffect(() =>{
+        if(isLoggedIn){
+            alert('로그인 성공');
+            navigate('/');
+        }else{
+            // alert("로그인 실패!!");
+            // navigate('/login');
+        }
+        
+    },[isLoggedIn]);
 
     /** form 데이터 입력 함수 */
     const handleChangeForm = (event) => {
@@ -31,25 +46,27 @@ export default function Login() {
         event.preventDefault();        
         if(validateLogin(refs, msgRefs)) {
 
+            dispatch(getLogin(formData)); // 비동기 처리
+
             //리액트 ---> 노드서버(express) 데이터 전송 로그인
-            axios
-                .post('http://localhost:9000/member/login', formData)
-                .then(res => {
-                    // console.log('res.data-->', res.data) 
-                    if(res.data.result_rows === 1) {
-                        alert("로그인 성공!!");
-                        localStorage.setItem("token", res.data.token);
-                        localStorage.setItem("user_id", formData.id);                        
-                        setIsLoggedIn(true);
-                        navigate('/');
-                    } else {
-                        alert("로그인 실패!!");
-                    }
-                })
-                .catch(error => {
-                    alert("로그인 실패!!");
-                    console.log(error);
-                });    
+            // axios
+            //     .post('http://localhost:9000/member/login', formData)
+            //     .then(res => {
+            //         // console.log('res.data-->', res.data) 
+            //         if(res.data.result_rows === 1) {
+            //             alert("로그인 성공!!");
+            //             localStorage.setItem("token", res.data.token);
+            //             localStorage.setItem("user_id", formData.id);                        
+            //             setIsLoggedIn(true);
+            //             navigate('/');
+            //         } else {
+            //             alert("로그인 실패!!");
+            //         }
+            //     })
+            //     .catch(error => {
+            //         alert("로그인 실패!!");
+            //         console.log(error);
+            //     });    
             
         }
     }

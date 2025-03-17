@@ -5,6 +5,8 @@ import jwt from 'jsonwebtoken';
  * 로그인 : checkLogin
  */
 export const checkLogin = async(req, res) => {
+    console.log(req.body);
+    
     let result = await repository.checkLogin(req.body); // result_rows=1
 
     if(result.result_rows === 1) {
