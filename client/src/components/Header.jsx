@@ -1,26 +1,21 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate  } from 'react-router-dom';
 import { FiShoppingBag } from "react-icons/fi";
-import { AuthContext } from '../auth/AuthContext.js';
-import { CartContext } from '../context/CartContext.js';
-import { useCart } from "../hooks/useCart.js";
 import { LuShoppingCart } from "react-icons/lu";
-import { IoPersonOutline } from "react-icons/io5";
 import { useSelector, useDispatch } from 'react-redux';
 import {getLogout} from '../services/authApi.js';
+import { getCount, clearCount } from '../services/cartApi.js';
 
 export default function Header() {
     const dispatch = useDispatch();
     const isLoggedIn = useSelector(state => state.login.isLoggedIn); // state객체는 store를 가르킨다.
-    const { getCount, setCount } = useCart(); 
-    const { cartCount } = useContext(CartContext);
-    // const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
+    const cartCount = useSelector(state => state.cart.cartCount);
     const navigate = useNavigate();
     const id = localStorage.getItem("user_id");
 
     //로그인 상태에 따라 cartCount 값 변경
     useEffect(()=>{
-        isLoggedIn ?    getCount() :   setCount(0);
+        isLoggedIn ?    dispatch(getCount()) :   dispatch(clearCount(0));
     }, [isLoggedIn]);
 
     const handleLoginToggle = () => {
@@ -29,8 +24,7 @@ export default function Header() {
             if(select) {
                 
                 dispatch(getLogout());
-                // setIsLoggedIn(false);
-                // navigate('/');
+                navigate('/');
             }    
         } else {  
             navigate('/login');
@@ -57,9 +51,11 @@ export default function Header() {
                     <button type="button" onClick={handleLoginToggle}>
                         { isLoggedIn ? "Logout" : "Login" }
                     </button>
-                    <Link to='/signup'>
-                        <button type="button">Signup</button>
-                    </Link>  
+                    { !isLoggedIn && 
+                        <Link to='/signup'>
+                            <button type="button">Signup</button>
+                        </Link>  
+                    }
                     
                     { isLoggedIn && 
                         <Link to='/products/new'>

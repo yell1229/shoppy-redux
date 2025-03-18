@@ -9,13 +9,17 @@ import axios from "axios";
 import { CartContext } from "../context/CartContext.js";
 import { AuthContext } from "../auth/AuthContext.js";
 import { useCart } from "../hooks/useCart.js";
+import {useSelector, useDispatch} from 'react-redux';
+import {updateCartList, saveToCartList, clearAdded} from '../services/cartApi.js';
 
 
 export default function DetailProduct() {
-  const { saveToCartList, updateCartList } = useCart();
+  const dispatch = useDispatch();
+  const isLoggedIn = useSelector(state => state.login.isLoggedIn);
+  const cartList = useSelector(state => state.cart.cartList);
+  const isAdded = useSelector(state => state.cart.isAdded);
+
   const navigate = useNavigate();
-  const { isLoggedIn} = useContext(AuthContext);
-  const { cartList } = useContext(CartContext);
   const { pid } = useParams();
   const [product, setProduct] = useState({});
   const [imgList, setImgList] = useState([]);
@@ -24,6 +28,12 @@ export default function DetailProduct() {
   const [tabName, setTabName] = useState('detail');
   const tabLabels = ['DETAIL', 'REVIEW', 'Q&A', 'RETURN & DELIVERY'];
   const tabEventNames = ['detail', 'review', 'qna', 'return'];
+  useEffect(()=>{
+    if(isAdded){
+      alert("장바구니에 추가되었습니다.");
+      dispatch(clearAdded());
+    } 
+  },[isAdded]);
 
   useEffect(() => {
     axios
@@ -45,14 +55,14 @@ export default function DetailProduct() {
                                             && item.size === size);                                  
         if(findItem !== undefined) {  
             //qty+1 업데이트      
-            const result = updateCartList(findItem.cid, "increase");
+            const result = dispatch(updateCartList(findItem.cid, "increase"));
             result && alert("장바구니에 추가되었습니다.");
         } else {
             //새로 추가
-            const id = localStorage.getItem("user_id");
-            const formData = {id:id, cartList:[cartItem]};
-            const result = saveToCartList(formData);
-            result && alert("장바구니에 추가되었습니다.");
+            // const id = localStorage.getItem("user_id");
+            // const formData = {id:id, cartList:[cartItem]};
+            dispatch(saveToCartList(cartItem));
+            
         }                                            
     } else {
       const select = window.confirm("로그인 서비스가 필요합니다. \n로그인 하시겠습니까?");
